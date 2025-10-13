@@ -6,6 +6,7 @@ def configure_gemini(api_key):
     return genai.GenerativeModel('gemini-2.0-flash')
 
 def generate_gemini_response(gemini_model, system_prompt, message):
+    print(f"[DEBUG] Generating Gemini response with system prompt: {system_prompt} and message: {message}")
     messages_gemini = [
         {
             "role": "user",

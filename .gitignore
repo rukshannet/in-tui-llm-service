@@ -2,3 +2,4 @@
 /config
 
 service-account.json
+in-tui-backend-service-firebase-adminsdk-fbsvc-*.json
