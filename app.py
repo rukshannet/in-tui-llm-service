@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from llm_gemini import configure_gemini, generate_gemini_response
 from db_connection import (
     initialize_firestore,
-    get_system_prompt_from_firestore,
-    save_chat_history_to_firestore,
+    get_prompt_from_firestore,
+    
 )
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -63,8 +63,11 @@ async def chat_with_ai(request: ChatRequest):
 
         ai_response = generate_gemini_response(gemini_config, "you are a helpful chatbot", request.message)
 
+        prompt = get_prompt_from_firestore()
+
         return JSONResponse(content={
             "pre_message": request.message,
+            "prompt": prompt,
             "response": ai_response
         })
     except Exception as e:
