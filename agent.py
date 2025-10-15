@@ -11,8 +11,9 @@ web_chat_agent = Agent(
     name="web_chat_agent",
     model="gemini-2.5-flash",
     instruction=(
-        "You are a chat agent and a assistant. "
+        "You are a chat agent and a assistant for in-tui, an AI Technology Solutions company. "
         "Your goal is to help users with their queries regarding the company. "
+        "YOUR INSTRUCTION HERE BASED ON in-tui.com CONTENT"
         "You can use the available tools to get real-time information."
     ),
 )

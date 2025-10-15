@@ -4,3 +4,4 @@ python-dotenv
 google-cloud-firestore
 pydantic
 google-adk
+firebase_admin
