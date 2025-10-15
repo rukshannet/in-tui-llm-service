@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from db_connection import (
     initialize_firestore,
     is_app_registered,
+    get_prompt_from_firestore
 )
 from agent import chat_with_ai
 
@@ -54,6 +55,7 @@ def chat_agent(request: ChatRequest):
     if not is_app_registered(request.api_key, request.service_id):
         raise HTTPException(status_code=401, detail='Unauthorized: Invalid API key or service ID')
 
+    prompt = get_prompt_from_firestore(request.service_id)
     response = chat_with_ai(request)
 
     return response
