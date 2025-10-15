@@ -4,8 +4,29 @@ from google.genai import types
 from google.adk.sessions import InMemorySessionService
 from google.adk.runners import Runner
 from fastapi.responses import JSONResponse
+from sendmail import send_gmail
 
 MODEL_NAME = "gemini-2.5-flash" 
+
+def send_email_to_support(user_email: str, subject: str, body: str) -> str:
+    """
+    Sends an email to the in-tui.com support team (support@in-tui.com) and CCs the user.
+    Use this function when the user asks for more details about a specific product or service,
+    or explicitly asks to contact support for a specific request.
+    
+    Args:
+        user_email: The email address of the user for CC.
+        subject: The subject line of the email, summarizing the user's request.
+        body: The main content of the email, detailing the user's request for more information.
+    
+    Returns:
+        A success message indicating the email has been sent.
+    """
+    send_gmail(user_email, subject, body)
+    
+    return f"A detailed inquiry has been sent to support@in-tui.com, and a copy has been successfully CC'd to {user_email}. Our team will respond within 24 hours."
+
+
 CHATBOT_INSTRUCTION = """
 You are the official Website Chat Assistant for in-tui.com, a forward-thinking AI Technology Solutions company.
 Your primary role is to provide quick, accurate, and concise information based ONLY on the context provided below.
@@ -37,6 +58,8 @@ Your primary role is to provide quick, accurate, and concise information based O
     - Phone: 773416484
     - Response Time: We respond to contact form submissions within 24 hours.
     
+    You can requst user email when ever you feel (but do not ask for Subject or email body, u should generate them based on the conversation) to send more details about a specific product or service, or if the user explicitly asks to contact support for a specific request. and user Email tool to send an email. 
+
 4.  **Out-of-Context Refusal (Critical Constraint):**
     If a user asks about anything not explicitly covered in the "Core Knowledge" section above (e.g., world news, other companies, personal opinions, jokes), you MUST refuse politely and strictly.
     
@@ -57,14 +80,11 @@ web_chat_agent = Agent(
     model=MODEL_NAME,
     description='Handles website inquiries about products, services, and contact information.',
     instruction=CHATBOT_INSTRUCTION,
+    tools=[send_email_to_support],
 )
 
-def chat_with_ai(request):
 
-    user_message_content = types.Content(
-        role='user',
-        parts=[types.Part(text=request.message)]
-    )
+def chat_with_ai(request):
 
     session = asyncio.run(session_service.create_session(
         app_name=request.service_id,
