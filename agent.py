@@ -1,14 +1,42 @@
+import asyncio
 from google.adk.agents import Agent
-# Note: google.adk.agents.Agent is an alias for LlmAgent
+from google.genai import types
+from google.adk.sessions import InMemorySessionService
+from google.adk.runners import Runner
+from fastapi.responses import JSONResponse
 
-# Create the main agent
-travel_planner_agent = Agent(
-    name="travel_planner_agent",
-    model="gemini-2.5-flash", # Changed model to 2.5 flash
+session_service = InMemorySessionService()
+
+web_chat_agent = Agent(
+    name="web_chat_agent",
+    model="gemini-2.5-flash",
     instruction=(
-        "You are a world-class travel planner and assistant. "
-        "Your goal is to help users plan their dream vacations. "
+        "You are a chat agent and a assistant. "
+        "Your goal is to help users with their queries regarding the company. "
         "You can use the available tools to get real-time information."
     ),
-    # Add tools here if available, e.g., tools=[GoogleSearchTool()]
 )
+
+def chat_with_ai(request):
+
+    user_message_content = types.Content(
+        role='user',
+        parts=[types.Part(text=request.message)]
+    )
+
+    session = asyncio.run(session_service.create_session(
+        app_name=request.service_id,
+        user_id=request.user_id,
+        session_id=request.session_id
+    ))
+
+    runner = Runner(agent=web_chat_agent, app_name=request.service_id, session_service=session_service)
+
+    content = types.Content(role='user', parts=[types.Part(text=request.message)])
+    events = runner.run(user_id=request.user_id, session_id=request.session_id, new_message=content)
+
+    for event in events:
+        if event.is_final_response():
+            final_response = event.content.parts[0].text
+
+    return JSONResponse(content={'response': final_response})
