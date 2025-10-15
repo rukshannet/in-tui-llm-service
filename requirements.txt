@@ -1,6 +1,6 @@
-Flask
-firebase-admin
-openai
+fastapi
+uvicorn
 python-dotenv
-google-generativeai
-flask-cors
+google-cloud-firestore
+pydantic
+google-adk
